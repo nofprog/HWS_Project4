@@ -13,6 +13,8 @@ class ViewController: UIViewController, WKNavigationDelegate {
     var webView: WKWebView!
     var progressView: UIProgressView!
     
+    var websites = ["apple.com", "qiita.com"]
+    
     override func loadView() {
         webView = WKWebView()
         webView.navigationDelegate = self
@@ -32,7 +34,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         webView.addObserver(self, forKeyPath: #keyPath(WKWebView.estimatedProgress), options: .new, context: nil)
         
         let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
-        //タップできないため、targetとactionいらない
+        //タップできないため、targetとactionはいらない
         
         
         let reflesh = UIBarButtonItem(barButtonSystemItem:.refresh, target: webView, action: #selector(webView.reload))
@@ -41,7 +43,7 @@ class ViewController: UIViewController, WKNavigationDelegate {
         
         navigationController?.isToolbarHidden = false
 
-        let url = URL(string: "https://github.com/nofprog")!
+        let url = URL(string: "https://" + websites[1])!
         webView.load(URLRequest(url: url))
         webView.allowsBackForwardNavigationGestures = true
 
@@ -49,8 +51,11 @@ class ViewController: UIViewController, WKNavigationDelegate {
     
     @objc func openTapped(){
         let ac = UIAlertController(title: "Open page", message: nil, preferredStyle: .actionSheet)
-        ac.addAction(UIAlertAction(title: "apple.com", style: .default, handler: openPage))
-        ac.addAction(UIAlertAction(title: "github.com/nofprog", style: .default, handler: openPage))
+        
+        for website in websites {
+            ac.addAction(UIAlertAction(title: website, style: .default, handler: openPage))
+        }
+        
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         ac.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
         present(ac, animated: true)
@@ -63,12 +68,29 @@ class ViewController: UIViewController, WKNavigationDelegate {
     }
     
     func openPage(action: UIAlertAction){
-        let url = URL(string: "http://" + action.title!)!
+        let url = URL(string: "https://" + action.title!)!
         webView.load(URLRequest(url: url))
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         title = webView.title
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        
+        let url = navigationAction.request.url
+        
+        if let host = url?.host {
+            for website in websites {
+                if host.contains(website) {
+                    decisionHandler(.allow)
+                    return
+                }
+            }
+        }
+        
+        decisionHandler(.cancel)
+        
     }
  
 

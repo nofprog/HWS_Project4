@@ -6,14 +6,29 @@
 //
 
 import UIKit
+import WebKit
 
-class ViewController: UIViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
+class ViewController: UIViewController, WKNavigationDelegate {
+    
+    var webView: WKWebView!
+    
+    override func loadView() {
+        webView = WKWebView()
+        webView.navigationDelegate = self
+        view = webView
     }
 
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        let url = URL(string: "https://github.com/nofprog")!
+        webView.load(URLRequest(url: url))
+        webView.allowsBackForwardNavigationGestures = true
+
+    }
+    
+ 
 
 }
 
